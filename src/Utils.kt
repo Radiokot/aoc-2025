@@ -3,10 +3,13 @@ import java.security.MessageDigest
 import kotlin.io.path.Path
 import kotlin.io.path.readText
 
+typealias InputStrings = List<String>
+
 /**
  * Reads lines from the given input txt file.
  */
-fun readInput(name: String) = Path("src/$name.txt").readText().trim().lines()
+fun readInput(name: String): InputStrings =
+    Path("src/$name.txt").readText().trim().lines()
 
 /**
  * Converts string to md5 hash.
@@ -19,3 +22,6 @@ fun String.md5() = BigInteger(1, MessageDigest.getInstance("MD5").digest(toByteA
  * The cleaner shorthand for printing output.
  */
 fun Any?.println() = println(this)
+
+fun InputStrings.filterNotEmpty(): InputStrings =
+    filter(String::isNotEmpty)
