@@ -47,6 +47,27 @@ I liked how Roman Elizarov used two inline `(-1..1)` loops to count occupied spa
 and then used `<=4` condition instead of `<4` to address counting the cell itself as occupied.
 Usually I don't understand his code at all.
 
+## [Day 5](https://adventofcode.com/2025/day/4)
+
+For the first part I just programmed what was described in the problem:
+parse ranges (`LongRange`), then count IDs present in at least one range.
+
+For the second part I initially tried to put all the parsed range values into a set
+by doing `flatMapTo(mutableSetOf(), LongRange::toSet)` on `List<LongRange>` –
+it was not a big surprise when this didn't work because of the huge range sizes.
+Then I decided to create a set of ranges that do not intersect and sum their sizes,
+which worked.
+
+How a new range can intersect with the already known ranges from the set, and what to do with it?
+
+1. It can fully cover one or few known ranges – then get rid of these ranges
+2. It can start inside a known range – then make it start right after this range
+3. It can end inside a known range – then make it end right before this range
+
+If both #2 and #3 are true and point to the same range, this means the new range
+is fully inside a known one, in which case the new one is discarded.
+
+
 [aoc]: https://adventofcode.com
 [github]: https://github.com/radiokot
 [issues]: https://github.com/kotlin-hands-on/advent-of-code-kotlin-template/issues
