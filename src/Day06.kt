@@ -31,31 +31,37 @@ fun main() {
     fun part2(input: InputStrings): Any {
         val sheet = input.filterNotEmpty()
         // Rows in the sheet lack end space padding.
-        val sheetWidth = sheet.maxOf(String::length)
+        val columnCount = sheet.maxOf(String::length)
 
         var sumOfOperations = 0L
         val readOperands = mutableListOf<Long>()
 
-        (sheetWidth - 1 downTo 0).forEach { charIndex ->
-            val verticallyReadValue =
+        (columnCount - 1 downTo 0).forEach { columnIndex ->
+            val columnValue =
                 sheet
                     .mapNotNull { row ->
-                        row
-                            .getOrNull(charIndex)
-                            ?.takeUnless(Char::isWhitespace)
+                        row.getOrNull(columnIndex)
                     }
                     .joinToString(separator = "")
-                    .takeIf(String::isNotEmpty)
+                    .takeIf(String::isNotBlank)
                     ?: return@forEach
 
+            // If column value is not blank, there's always an operand in it,
+            // read it discarding spaces and an operator.
             readOperands +=
-                verticallyReadValue
-                    .trim('*', '+')
+                columnValue
+                    .filter(Char::isDigit)
                     .toLong()
 
-            // Seems that the operator is always under the last operand.
-            if (!verticallyReadValue.last().isDigit()) {
-                val operator = verticallyReadValue.last()
+            // There may be an operator in this column,
+            // which is not a digit and not a space.
+            val operator: Char? =
+                columnValue
+                    .find { !it.isDigit() && !it.isWhitespace() }
+
+            // If the operator is in this column,
+            // it's the end of this problem.
+            if (operator != null) {
                 sumOfOperations += readOperands.compute(operator)
                 readOperands.clear()
             }
