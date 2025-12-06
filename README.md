@@ -47,7 +47,10 @@ I liked how Roman Elizarov used two inline `(-1..1)` loops to count occupied spa
 and then used `<=4` condition instead of `<4` to address counting the cell itself as occupied.
 Usually I don't understand his code at all.
 
-## [Day 5](https://adventofcode.com/2025/day/4)
+Because of the problem being so easy, the JetBrains stream this day was all about Kotlin Notebook,
+which I found impressive.
+
+## [Day 5](https://adventofcode.com/2025/day/5)
 
 For the first part I just programmed what was described in the problem:
 parse ranges (`LongRange`), then count IDs present in at least one range.
@@ -67,6 +70,24 @@ How a new range can intersect with the already known ranges from the set, and wh
 If both #2 and #3 are true and point to the same range, this means the new range
 is fully inside a known one, in which case the new one is discarded.
 
+Later I learned that this can be easier if the ranges are first sorted by the start,
+but I left my solution intact.
+
+## [Day 6](https://adventofcode.com/2025/day/6)
+
+For the first part I transformed the input into an operand matrix and a list of operators.
+Then I transposed the operand matrix for convenience – columns became rows
+so each individual row now contained operands of the same problem.
+
+For the second part I decided to implement what was described in the problem:
+reading the sheet vertically from right to left, figuring out operands of the problem,
+finding the operator, computing the problem and moving on.
+This didn't work from the first try – I discovered the following caveats:
+
+1. Rows in the input don't have space padding at the end, they are of different length
+2. To parse the value read vertically as a number, I needed to do something with spaces in it. 
+   I initially wanted to remove them with `trim()`, but found out that in the column with the operator
+   it is possible to read a value with spaces in between, like `_12__+`, which required special treatment
 
 [aoc]: https://adventofcode.com
 [github]: https://github.com/radiokot
