@@ -89,6 +89,18 @@ This didn't work from the first try – I discovered the following caveats:
    I initially wanted to remove them with `trim()`, but found out that in the column with the operator
    it is possible to read a value with spaces in between, like `_12__+`, which required special treatment
 
+## [Day 7](https://adventofcode.com/2025/day/7)
+
+Having the experience of the previous year, I know a problem with something doubling in size each iteration
+(in this case, a row) is a problem of calculating each iteration considering the result from the previous iteration.
+The answer then totals up in the last iteration calculation.
+
+For the first part, I summed up number of spits while calculating through which cells a beam goes each row.
+
+For the second part, I tracked not just a fact of a beam going through a cell, but also how many ways there are
+for a beam to reach this cell and if the cell affects number of ways further. A last year caveat I forgot of
+was using `Long` when counting rapidly doubling numbers.
+
 [aoc]: https://adventofcode.com
 [github]: https://github.com/radiokot
 [issues]: https://github.com/kotlin-hands-on/advent-of-code-kotlin-template/issues
