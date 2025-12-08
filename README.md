@@ -1,6 +1,7 @@
 # Advent of Code 2025 in Kotlin
 
-Welcome to the [Advent of Code][aoc] Kotlin project created by [Radiokot][github] using the [Advent of Code Kotlin Template][template] delivered by JetBrains.
+Welcome to the [Advent of Code][aoc] Kotlin project created by [Radiokot][github] using
+the [Advent of Code Kotlin Template][template] delivered by JetBrains.
 
 ## [Day 1](https://adventofcode.com/2025/day/1)
 
@@ -85,7 +86,7 @@ finding the operator, computing the problem and moving on.
 This didn't work from the first try – I discovered the following caveats:
 
 1. Rows in the input don't have space padding at the end, they are of different length
-2. To parse the value read vertically as a number, I needed to do something with spaces in it. 
+2. To parse the value read vertically as a number, I needed to do something with spaces in it.
    I initially wanted to remove them with `trim()`, but found out that in the column with the operator
    it is possible to read a value with spaces in between, like `_12__+`, which required special treatment
 
@@ -101,9 +102,30 @@ For the second part, I tracked not just a fact of a beam going through a cell, b
 for a beam to reach this cell and if the cell affects number of ways further. A last year caveat I forgot of
 was using `Long` when counting rapidly doubling numbers.
 
+## [Day 8](https://adventofcode.com/2025/day/8)
+
+Was it a graph problem? I'm not sure, but I certainly don't want to remember graph algorithms once again,
+so it's a relief I didn't have to do this today.
+
+I started by obtaining a sorted list of distances between different points, without duplicates (`A<->B` = `B<->A`).
+Did it by comparing all the points to each other.
+As for the circuits, decided to store them as sets of points, starting with each point being its own circuit.
+Point connection then is a function that finds circuits of both points, glues them together
+and replaces the two with the glued one.
+
+Part 1 does the required number of connections between the closest points, 
+then returns the requested circuit size product.
+Part 2 connects closest points until the glued circuit is big enough (contains all the points),
+then returns the requested X coordinate product.
+
 [aoc]: https://adventofcode.com
+
 [github]: https://github.com/radiokot
+
 [issues]: https://github.com/kotlin-hands-on/advent-of-code-kotlin-template/issues
+
 [kotlin]: https://kotlinlang.org
+
 [slack]: https://surveys.jetbrains.com/s3/kotlin-slack-sign-up
+
 [template]: https://github.com/kotlin-hands-on/advent-of-code-kotlin-template
