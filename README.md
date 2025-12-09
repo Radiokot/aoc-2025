@@ -118,6 +118,36 @@ then returns the requested circuit size product.
 Part 2 connects closest points until the glued circuit is big enough (contains all the points),
 then returns the requested X coordinate product.
 
+## [Day 9](https://adventofcode.com/2025/day/9)
+
+Geometry problems were hard for me last year, this one was hard too.
+
+For the first part, bruteforce solution runs very quick – 
+just try all the possible rectangles and find the largest one.
+
+For the second part, the best candidates must be filtered out.
+I thought of all the possible corner cases and didn't manage to come up with an inside/outside check
+that could satisfy them all. However, when I visualized the input data with `BufferedImage` and `Graphics2D`,
+the shape turned out to be quite simple. My friend gave me a clue on how to check coordinates against the perimeter,
+and the filter worked after running for about 3 seconds:
+
+<img src="day-9-visualisation.png" width="500"  alt="Visualization"/>
+
+1. I checked if any of the rectangle corners is obviously outside the perimeter,
+   such rectangles can be filtered out right away;
+2. If a rectangle has all their corners inside the perimeter, it still could cross some of the outside area,
+   which is the case in the input data.
+   I checked if any of the rectangle edges is perpendicularly crossed by the perimeter.
+
+I don't like this solution. Although a star is acquired, I think if the shape wasn't a simple circle
+with one straight cut in the middle, my checks wouldn't work or would run for too long.
+
+Roman Elizarov just knew the algorithm for this problem, obviously.
+On Reddit, I've seen people getting the right answer
+with quite a long-running bruteforces, much longer than 3 seconds.
+One guy tried randomly picking some number of points within a rectangle
+and checking them for being a perimeter, then assuming the whole rectangle is correct – it worked too.
+
 [aoc]: https://adventofcode.com
 
 [github]: https://github.com/radiokot

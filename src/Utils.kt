@@ -1,5 +1,9 @@
+import java.awt.Graphics2D
+import java.awt.image.BufferedImage
+import java.io.File
 import java.math.BigInteger
 import java.security.MessageDigest
+import javax.imageio.ImageIO
 import kotlin.io.path.Path
 import kotlin.io.path.readText
 
@@ -25,3 +29,15 @@ fun Any?.println() = println(this)
 
 fun InputStrings.filterNotEmpty(): InputStrings =
     filter(String::isNotEmpty)
+
+fun BufferedImage.draw(doDraw: Graphics2D.() -> Any) = with(createGraphics()) {
+    try {
+        doDraw()
+    } finally {
+        dispose()
+    }
+}
+
+fun saveVisualisation(image: BufferedImage) {
+    ImageIO.write(image, "png", File("visualisation.png"))
+}
