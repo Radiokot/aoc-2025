@@ -10,6 +10,7 @@ sourceSets {
 
 tasks {
     wrapper {
-        gradleVersion = "9.2.1"
+        gradleVersion = "8.7"
+        distributionType = Wrapper.DistributionType.BIN
     }
 }
