@@ -26,7 +26,7 @@ For the first part I wrote loop that tests every possible first digit combining 
 with the max digit from what's left to the right. If only had I realized that the testing is pointless,
 and you just need to pick the max one too, the second part would have been easier for me.
 
-I spent 1.5 hours implementing a recursive bruteforce for the second part
+I spent 1.5 hours implementing a recursive brute-force for the second part
 and then hopelessly trying to make it run on the big input lines.
 I thought it needed a dynamic programming solution, but since I don't understand it,
 I gave up and went to Reddit for a hint.
@@ -122,7 +122,7 @@ then returns the requested X coordinate product.
 
 Geometry problems were hard for me last year, this one was hard too.
 
-For the first part, bruteforce solution runs very quick – 
+For the first part, brute-force solution runs very quick – 
 just try all the possible rectangles and find the largest one.
 
 For the second part, the best candidates must be filtered out.
@@ -144,9 +144,24 @@ with one straight cut in the middle, my checks wouldn't work or would run for to
 
 Roman Elizarov just knew the algorithm for this problem, obviously.
 On Reddit, I've seen people getting the right answer
-with quite a long-running bruteforces, much longer than 3 seconds.
+with quite a long-running brute-forces, much longer than 3 seconds.
 One guy tried randomly picking some number of points within a rectangle
 and checking them for being a perimeter, then assuming the whole rectangle is correct – it worked too.
+
+## [Day 10](https://adventofcode.com/2025/day/10), one star
+
+For the first part, I wrote a loop that just hits random buttons until the required lights state is reached.
+For each machine, this is repeated 100,000 times, so the loop it is very-very likely to find the minimal press count.
+I solved some of the last year problems this way, I'm glad it worked here too.
+
+For the second part, I desperately tried to implement a recursive brute-force with memoization and other optimizations,
+but nevertheless it only solved 23% of the input.
+I doubled down on the brute-force as Roman Elizarov said it was possible,
+but apparently I still don't see all the clues therefore unable to optimize it enough.
+
+On Reddit, I read that the problem can be solved as a system of equations, and I did this last year,
+but this time the system is not square – number of equations (number of joltages) is less
+than the number of variables (press count of each button). Solving such a system is beyond my comprehension.
 
 [aoc]: https://adventofcode.com
 
