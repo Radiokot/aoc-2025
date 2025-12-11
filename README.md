@@ -184,7 +184,7 @@ I tried recursive search:
 
 The mere recursion choked as well, but I was sure it wasn't going to work right away – not until I add memoization.
 Turned out that to solve my input, only 1,359 unique path counts from various nodes of the graph must be calculated. 
-All the subsequent function calls then can recursion by just returning the already known count.
+All the subsequent function calls then can avoid recursion by just returning the already known count.
 With memoization, the recursive search works instantly. The answer is huge, takes `Long` to hold it.
 
 I think there must be a way to also solve part 2 in a loop, counting from top to bottom, like in [Day 7](#day-7).
