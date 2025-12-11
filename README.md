@@ -163,6 +163,33 @@ On Reddit, I read that the problem can be solved as a system of equations, and I
 but this time the system is not square – number of equations (number of joltages) is less
 than the number of variables (press count of each button). Solving such a system is beyond my comprehension.
 
+## [Day 11](https://adventofcode.com/2025/day/11)
+
+It's a graph problem, and the first part required finding the number of all the possible paths between 2 nodes.
+Instead of thinking I just searched for an existing graph algorithm I didn't want to remember earlier.
+Found that simple breadth-first search can be modified to track paths instead of individual visited nodes,
+implemented it, got the answer.
+
+The second part required what seemed to be the same, but the paths to count needed to contain 2 specific nodes,
+and also the start node changed. Change of the start node drastically increased the number of paths to check
+causing breadth-first search to choke.
+
+I tried recursive search: 
+- The number of problematic paths (containing 2 specific nodes)
+  from a given node is a sum of all the problematic paths from its children;
+- However, if the given node already is the target, then consider one problematic path found (return 1)
+  only if the specific 2 nodes have been encountered, otherwise consider no problematic path found (return 0);
+- To track encounters, pass them as a set in the function parameter – the set is initially empty,
+  but the given node gets added to it if it is one of the 2 specific nodes.
+
+The mere recursion choked as well, but I was sure it wasn't going to work right away – not until I add memoization.
+Turned out that to solve my input, only 1,359 unique path counts from various nodes of the graph must be calculated. 
+All the subsequent function calls then can recursion by just returning the already known count.
+With memoization, the recursive search works instantly. The answer is huge, takes `Long` to hold it.
+
+I think there must be a way to also solve part 2 in a loop, counting from top to bottom, like in [Day 7](#day-7).
+I wonder if Roman Elizarov did just that.
+
 [aoc]: https://adventofcode.com
 
 [github]: https://github.com/radiokot
