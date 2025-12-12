@@ -190,6 +190,23 @@ With memoization, the recursive search works instantly. The answer is huge, take
 I think there must be a way to also solve part 2 in a loop, counting from top to bottom, like in [Day 7](#day-7).
 I wonder if Roman Elizarov did just that.
 
+## [Day 12](https://adventofcode.com/2025/day/12), one star
+
+The last day of this year.
+
+The first part requires you to write a check for if a given rectangle can be filled with a given number
+of tetris-like shapes without them overlaps, while shapes can be rotated and flipped. 
+At first, I thought this was very tough as I didn't even have an idea of how to place the shapes by hand,
+let alone program it. I began with implementing the data parsing, shape rotation and flipping methods.
+
+Turned out this task is prank. The first and the most obvious check is to compare
+the area of a rectangle and the area of all the required shapes. If there is not enough space,
+filling it is definitely not possible, but if there is – need to check further... but not for this task.
+Although the area check doesn't give the right answer on the test data,
+it alone is enough to get the correct answer for part 1.
+
+The second part is locked for me as I didn't solve the second part of Day 10.
+
 [aoc]: https://adventofcode.com
 
 [github]: https://github.com/radiokot
