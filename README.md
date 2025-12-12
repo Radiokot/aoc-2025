@@ -207,6 +207,9 @@ it alone is enough to get the correct answer for part 1.
 
 Later I decided to implement a recursive brute-force anyway, it checks all the regions in 2.5 minutes
 and indeed gives the same number of valid regions as the simple area check.
+This also allowed seeing the placements:
+
+<img src="day-12-visualisation.png" width="360"  alt="Visualization"/>
 
 The second part is locked for me as I didn't solve the second part of Day 10.
 
