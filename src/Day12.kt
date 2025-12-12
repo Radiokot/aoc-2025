@@ -1,17 +1,16 @@
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.runBlocking
+
 fun main() {
-    fun part1(input: InputStrings): Any {
+    fun part1(input: InputStrings): Any = runBlocking(Dispatchers.Default) {
         val (presentShapes, regions) = input.toTask()
 
-        return regions.count { region ->
-            val areaOfAllRequiredPresents =
-                region
-                    .requiredPresentCount
-                    .zip(presentShapes)
-                    .sumOf { (count, shape) -> shape.area * count }
-
-            // LOL.
-            return@count region.area >= areaOfAllRequiredPresents
-        }
+        regions
+            .map { async { checkRegion(it, presentShapes) } }
+            .awaitAll()
+            .count { it }
     }
 
     fun part2(input: InputStrings): Any {
@@ -24,6 +23,93 @@ fun main() {
 
     part1(input).println()
     part2(input).println()
+}
+
+private fun checkRegion(
+    region: Region,
+    presentShapes: List<PresentShape>
+): Boolean {
+    val allRequiredPresents =
+        region
+            .requiredPresentCount
+            .zip(presentShapes)
+            .flatMap { (count, shape) -> List(count) { shape } }
+
+    if (allRequiredPresents.sumOf(PresentShape::area) > region.area) {
+        return false
+    }
+
+    // Since this task is a prank,
+    // returning true at this point is enough to get the right answer.
+
+    // return true
+
+    // Having all the flips and rotations pre-calculated saves time.
+    val flipsAndRotationsByPresentShape: Map<PresentShape, List<List<PresentShape>>> =
+        presentShapes.associateWith { shape ->
+            listOf(shape, shape.flipped()).map { flippedShape ->
+                (0..3).map { rotationCount ->
+                    var rotatedShape = flippedShape
+                    repeat(rotationCount) { rotatedShape = rotatedShape.rotatedClockwise() }
+                    rotatedShape
+                }
+            }
+        }
+
+    fun canPlace(
+        presents: List<PresentShape>,
+        freeSpace: List<List<Boolean>>,
+    ): Boolean {
+        if (presents.isEmpty()) {
+            return true
+        }
+
+        val presentToPlace = presents.last()
+        val remainingPresents = presents.dropLast(1)
+
+        return (0..region.height - presentToPlace.height).any { startRow ->
+            (0..region.width - presentToPlace.width).any { startColumn ->
+                (0..3).any { rotationCount ->
+                    (0..1).any attempt@{ flipCount ->
+                        val shapeToPlace =
+                            flipsAndRotationsByPresentShape
+                                .getValue(presentToPlace)[flipCount][rotationCount]
+
+                        val freeSpaceAfterPlacement =
+                            freeSpace
+                                .map(List<Boolean>::toMutableList)
+
+                        (0 until shapeToPlace.height).forEach { shapeRow ->
+                            (0 until shapeToPlace.width).forEach { shapeColumn ->
+                                if (shapeToPlace[shapeRow][shapeColumn]) {
+                                    if (freeSpace[startRow + shapeRow][startColumn + shapeColumn]) {
+                                        freeSpaceAfterPlacement[startRow + shapeRow][startColumn + shapeColumn] =
+                                            false
+                                    } else {
+                                        // Trying to place over a taken cell,
+                                        // this attempt is failed.
+                                        return@attempt false
+                                    }
+                                }
+                            }
+                        }
+
+                        return@attempt canPlace(
+                            presents = remainingPresents,
+                            freeSpace = freeSpaceAfterPlacement,
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    return canPlace(
+        presents = allRequiredPresents,
+        freeSpace = List(region.height) { List(region.width) { true } },
+    ).also {
+        println("Region $region: $it")
+    }
 }
 
 private typealias PresentShape = List<List<Boolean>>

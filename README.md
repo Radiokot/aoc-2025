@@ -205,6 +205,9 @@ filling it is definitely not possible, but if there is – need to check further
 Although the area check doesn't give the right answer on the test data,
 it alone is enough to get the correct answer for part 1.
 
+Later I decided to implement a recursive brute-force anyway, it checks all the regions in 2.5 minutes
+and indeed gives the same number of valid regions as the simple area check.
+
 The second part is locked for me as I didn't solve the second part of Day 10.
 
 [aoc]: https://adventofcode.com
