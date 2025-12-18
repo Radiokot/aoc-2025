@@ -148,7 +148,7 @@ with quite a long-running brute-forces, much longer than 3 seconds.
 One guy tried randomly picking some number of points within a rectangle
 and checking them for being a perimeter, then assuming the whole rectangle is correct – it worked too.
 
-## [Day 10](https://adventofcode.com/2025/day/10), one star
+## [Day 10](https://adventofcode.com/2025/day/10)
 
 For the first part, I wrote a loop that just hits random buttons until the required lights state is reached.
 For each machine, this is repeated 100,000 times, so the loop it is very-very likely to find the minimal press count.
@@ -161,7 +161,18 @@ but apparently I still don't see all the clues therefore unable to optimize it e
 
 On Reddit, I read that the problem can be solved as a system of equations, and I did this last year,
 but this time the system is not square – number of equations (number of joltages) is less
-than the number of variables (press count of each button). Solving such a system is beyond my comprehension.
+than the number of variables (press count of each button).
+
+Turned out, there is a math solver called Z3 which takes equations and inequalities and gives you a solution
+which satisfies them all. For each machine, I created a system with the following statements:
+
+1. For each joltage, sum of all the presses of buttons affecting this joltage = joltage
+2. Each button press count >= 0
+3. Each button press count <= min joltage this button affects
+
+There can be many solutions, the solver gives one, but it is not the best one.
+To find the best one, I iteratively added more and more "sum of button press counts < previous sum" inequalities
+to the system until it is not solvable. The sum from the last solved system is then the minimal one.
 
 ## [Day 11](https://adventofcode.com/2025/day/11)
 
@@ -190,7 +201,7 @@ With memoization, the recursive search works instantly. The answer is huge, take
 I think there must be a way to also solve part 2 in a loop, counting from top to bottom, like in [Day 7](#day-7).
 I wonder if Roman Elizarov did just that.
 
-## [Day 12](https://adventofcode.com/2025/day/12), one star
+## [Day 12](https://adventofcode.com/2025/day/12)
 
 The last day of this year.
 
@@ -211,7 +222,8 @@ This also allowed seeing the placements:
 
 <img src="day-12-visualisation.png" width="360"  alt="Visualization"/>
 
-The second part is locked for me as I didn't solve the second part of Day 10.
+The second part was locked for me as I initially didn't solve the second part of Day 10.
+After it was solved, turned out there was no part 2.
 
 [aoc]: https://adventofcode.com
 

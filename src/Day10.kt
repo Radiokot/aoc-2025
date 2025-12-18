@@ -1,13 +1,13 @@
+import io.ksmt.KContext
+import io.ksmt.solver.KSolverStatus
+import io.ksmt.solver.z3.KZ3Solver
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.yield
-import kotlin.concurrent.atomics.AtomicInt
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
-import kotlin.concurrent.atomics.incrementAndFetch
 import kotlin.math.min
-import kotlin.time.Clock
+import kotlin.time.Duration.Companion.seconds
 import kotlin.time.ExperimentalTime
 
 @OptIn(ExperimentalTime::class, ExperimentalAtomicApi::class)
@@ -36,123 +36,104 @@ fun main() {
             .sum()
     }
 
-    fun part2(input: InputStrings): Any = runBlocking(Dispatchers.Default) {
+    fun part2(input: InputStrings): Any {
         val machines = input.toMachines()
-        val solvedCount = AtomicInt(0)
+        val mathContext = KContext()
 
-        return@runBlocking input
-            .toMachines()
-            .sortedBy { it.requiredJoltages.size }
-            .mapIndexed { index, machine ->
-                async {
-                    val startTime = Clock.System.now()
+        return machines.sumOf { machine ->
+            KZ3Solver(mathContext).use { solver ->
+                with(mathContext) {
+                    // Searching for press count for each button
+                    // by solving each machine as an equation system.
 
-                    val memoization = mutableMapOf<Any, Long?>()
-
-                    suspend fun minPressesToReachRequiredJoltages(
-                        currentJoltages: List<Int> = machine.requiredJoltages.map { 0 },
-                    ): Long? {
-                        yield()
-
-                        val memoizationKey = currentJoltages
-
-                        if (memoization.containsKey(memoizationKey)) {
-                            return memoization[memoizationKey]
-                        }
-
-                        val unreachedJoltageIndices =
-                            currentJoltages
-                                .indices
-                                .filterTo(mutableSetOf()) { index ->
-                                    currentJoltages[index] < machine.requiredJoltages[index]
-                                }
-
-                        if (unreachedJoltageIndices.isEmpty()) {
-                            memoization[memoizationKey] = 0
-                            return 0
-                        }
-
-                        val possibleButtonsToPress =
-                            machine
-                                .buttons
-                                .filter { unreachedJoltageIndices.containsAll(it.indices) }
-
-                        val currentJoltages = currentJoltages.toMutableList()
-                        var initialPresses = 0
-
-                        val joltageIndicesWithSingleButton =
-                            machine
-                                .requiredJoltages
-                                .indices
-                                .map { joltageIndex ->
-                                    joltageIndex to possibleButtonsToPress.filter { joltageIndex in it.indices }
-                                }
-                                .mapNotNull { (joltageIndex, buttons) ->
-                                    if (buttons.size == 1)
-                                        joltageIndex to buttons.first()
-                                    else
-                                        null
-                                }
-
-                        joltageIndicesWithSingleButton.forEach { (joltageIndex, button) ->
-                            while (currentJoltages[joltageIndex] < machine.requiredJoltages[joltageIndex]) {
-                                button.toggleJoltages(currentJoltages)
-                                initialPresses++
-                            }
-                        }
-
-                        if (possibleButtonsToPress.isEmpty()) {
-                            memoization[memoizationKey] = null
-                            return null
-                        } else {
-                            val anyUnreachableJoltages = unreachedJoltageIndices.any { index ->
-                                currentJoltages[index] > machine.requiredJoltages[index]
-                                        || possibleButtonsToPress.none { button ->
-                                    index in button.indices
-                                }
-                            }
-                            if (anyUnreachableJoltages) {
-                                memoization[memoizationKey] = null
-                                return null
-                            }
-                        }
-
-                        return possibleButtonsToPress
-                            .mapNotNull { button ->
-                                minPressesToReachRequiredJoltages(
-                                    currentJoltages = button.getToggledJoltages(currentJoltages)
-                                )
-                            }
-                            .minOfOrNull { minPressesAfterPress ->
-                                minPressesAfterPress + initialPresses + 1
-                            }
-                            .also { result ->
-                                memoization[memoizationKey] = result
-                            }
+                    val searchedButtonPressCounts = machine.buttons.indices.map { buttonIndex ->
+                        mkConst("button${buttonIndex}PressCount", mkIntSort())
                     }
 
-                    val endTime = Clock.System.now()
+                    // For each joltage, add an equation:
+                    // sum of all the presses of buttons affecting this joltage = joltage
+                    // (each button press increments joltage by 1).
+                    machine.requiredJoltages.forEachIndexed { joltageIndex, joltage ->
+                        solver.assert(
+                            mkEq(
+                                mkArithAdd(
+                                    machine
+                                        .buttons
+                                        .mapIndexed { buttonIndex, button ->
+                                            mkArithMul(
+                                                searchedButtonPressCounts[buttonIndex],
+                                                mkIntNum(if (joltageIndex in button.indices) 1 else 0)
+                                            )
+                                        }
+                                ),
+                                mkIntNum(joltage)
+                            )
+                        )
+                    }
 
-                    val result = minPressesToReachRequiredJoltages()
-                        ?: error("Min presses not found for machine #$index")
+                    // Also add inequalities setting bounds
+                    // for each searched button press count:
+                    // count >= 0 and count <= min joltage this button affects
+                    machine.buttons.forEachIndexed { buttonIndex, button ->
+                        solver.assert(
+                            mkArithGe(
+                                searchedButtonPressCounts[buttonIndex],
+                                mkIntNum(0)
+                            )
+                        )
+                        solver.assert(
+                            mkArithLe(
+                                searchedButtonPressCounts[buttonIndex],
+                                mkIntNum(
+                                    machine
+                                        .requiredJoltages
+                                        .withIndex()
+                                        .filter { it.index in button.indices }
+                                        .minOf { it.value }
+                                )
+                            )
+                        )
+                    }
 
-                    val progressPercent = (solvedCount.incrementAndFetch().toDouble() / machines.size.toDouble()) * 100
+                    val pressCountSumExpression = mkArithAdd(searchedButtonPressCounts)
+                    var minPressCountSum: Int? = null
 
-                    println("$endTime: #$machine:\n$result, took ${endTime - startTime},\nprogress:$progressPercent%")
+                    // There can be many solutions.
+                    // Solver gives one, but it is not the best one.
+                    // Add more and more "sum of press counts < previous sum" inequalities
+                    // until the system is not solvable,
+                    // the last sum then is the minimal one.
+                    while (solver.check(10.seconds) == KSolverStatus.SAT) {
+                        minPressCountSum =
+                            solver
+                                .model()
+                                .eval(pressCountSumExpression)
+                                .toString()
+                                .toInt()
+                        solver.assert(
+                            mkArithLt(
+                                pressCountSumExpression,
+                                mkIntNum(minPressCountSum)
+                            )
+                        )
+                    }
 
-                    return@async result
+                    checkNotNull(minPressCountSum) {
+                        "Machine $machine failed to solve"
+                    }
+
+                    minPressCountSum.toLong()
                 }
             }
-            .awaitAll()
-            .sum()
+        }
     }
 
     val input =
 //        readInput("Day10_test")
         readInput("Day10")
 
-    part1(input).println()
-//    part2(input).println()
+//    part1(input).println()
+    part2(input).println()
 }
 
 private fun List<Boolean>.toLightsString() =

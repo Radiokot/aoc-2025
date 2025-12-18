@@ -17,4 +17,6 @@ tasks {
 
 dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
+    implementation("io.ksmt:ksmt-core:0.6.4")
+    implementation("io.ksmt:ksmt-z3:0.6.4")
 }
